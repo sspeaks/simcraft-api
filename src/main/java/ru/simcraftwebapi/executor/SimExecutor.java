@@ -133,7 +133,7 @@ public class SimExecutor {
 
         json = jsonParser.toJson(simResult);
 
-        return (type == MediaType.APPLICATION_JSON ? json : html);
+        return (type.equals("json") ? json : html);
 
     }
 

@@ -12,23 +12,24 @@ import ru.simcraftwebapi.executor.SimExecutor;
 import java.io.IOException;
 import java.util.Date;
 
-@Path("/simulate")
+@Path("")
 public class SimulationService {
     final Logger logger = LoggerFactory.getLogger(SimulationService.class);
 
     @GET
-    @Path("/{area_id}/{server_id}/{character_name}")
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response getKnowledgeBaseRule(@PathParam("area_id") String areaId, @PathParam("server_id") String serverId,
-                                         @PathParam("character_name") String characterName) {
-        logger.info(String.format("GET for /%s/%s/%s", areaId, serverId, characterName));
-        Gson jsonParse = new Gson();
+    @Path("/simulate")
+    @Produces({ MediaType.APPLICATION_JSON , MediaType.TEXT_HTML})
+    public Response simulate(@QueryParam("zone") String areaId,
+                                         @QueryParam("realm") String serverId,
+                                         @QueryParam("character") String characterName,
+                                         @QueryParam("type") String type) {
+        logger.info(String.format("GET for %s %s %s %s", areaId, serverId, characterName, type));
         String json = null;
         try {
-            json = jsonParse.toJson(SimExecutor.getResult(areaId, serverId, characterName, MediaType.APPLICATION_JSON));
+            json = SimExecutor.getResult(areaId, serverId, characterName, type);
         } catch (IOException e) {
             logger.error(e.getMessage());
-            return Response.status(200).entity(e.getMessage()).build();
+            return Response.serverError().entity(e.getMessage()).build();
         }
         return Response.ok().entity(json).build();
     }

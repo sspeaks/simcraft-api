@@ -30,3 +30,6 @@ RUN mkdir -p /root/simcraft \
     && apt-get purge -qy \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && rm -rf /var/lib/{apt,dpkg,cache,log}
+
+# Copy api key
+COPY /apikey.txt /root/simcraft/apikey.txt

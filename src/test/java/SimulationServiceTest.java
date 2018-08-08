@@ -8,7 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.simcraftwebapi.service.SimulationService;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -30,12 +33,17 @@ public class SimulationServiceTest extends JerseyTest{
     }
 
     @Test
-    public void testManyInOne() {
-        Response output = target("/simulate/eu/borean-tundra/мичикко").request().get();
+    public void testMainApi() {
+        WebTarget target = target("/simulate").
+        queryParam("zone", "eu").
+        queryParam("realm", "borean-tundra").
+        queryParam("character", "мичикко").
+        queryParam("type", "json");
+        Response output = target.request().get();
         assertEquals("Should return status 200", 200, output.getStatus());
         String res = output.readEntity(String.class);
-        assertNotNull("Should return list of KnowledgeBases", res);
-        logger.info(String.format("Test testPOSTKnowledgeBase result is: %s", res));
+        assertNotNull("Should return json", res);
+        logger.info(String.format("Test testMainApi result is: %s", res));
     }
 
 }
