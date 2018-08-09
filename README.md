@@ -1,6 +1,6 @@
-**WIP - Simulation Craft web REST api**
+# WIP - Simulation Craft web REST api
 
-`!The project development is in progress!`
+### ! The project development is in progress !
 
 Web REST API for simc project (https://github.com/simulationcraft/simc)
 
@@ -17,9 +17,9 @@ After building run container
 
 The application will be available on http://localhost:8080/simcraft-api
 
-**Working with service**  
+## Working with service  
 
-***Single calculation***
+### Sync calculation - waiting for calculation result
 
 To launch simulation for single character with response waiting send GET query to: 
 
@@ -41,6 +41,8 @@ with parameters
 example query
     
     http://localhost:8080/simcraft-api/simulate?zone=eu&realm=borean-tundra&character=MyAwsomeCharacterE&type=html&pawn=false&iterations=1000
+
+### Async calculation - without waiting for the result
     
 There are 2 types of execution: sync and async. While sync returns the result right after sending the query which might take a lot of time,
 async implementation launches calculation in different thread which allows to continue execution without waiting for response.
