@@ -3,21 +3,15 @@ package ru.simcraftwebapi.executor;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.hibernate.id.GUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.simcraftwebapi.configs.AppConfig;
-import ru.simcraftwebapi.core.Simulation;
-import ru.simcraftwebapi.core.SimulationResult;
 
-import javax.ws.rs.core.MediaType;
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,26 +20,26 @@ import java.util.*;
 
 public class SimExecutor {
 
-    public static String getResult(String areaId, String serverId, String characterName, String type, int scaleFactors) throws IOException {
+    public String json;
+    public String html;
+
+    public void simulate(UUID uuid,
+                           String areaId,
+                           String serverId,
+                           String characterName,
+                           boolean scaleFactors,
+                           int iterationsNumber) throws IOException {
         final Logger logger = LoggerFactory.getLogger(SimExecutor.class);
 
-        Simulation sim = new Simulation();
 
-        SimulationParams params = new SimulationParams();
-        params.areaId = areaId;
-        params.serverId = serverId;
-        params.characterName = characterName;
-
-                String uniqueName = String.format("Starting simulation for %s,%s,%s", areaId, serverId, characterName);
-        UUID uuid =UUID.randomUUID();
-
-        logger.info(String.format("Starting simulation for %s,%s,%s UUID  = %s", areaId, serverId, characterName, uuid));
+        logger.info(String.format("Starting simulation for %s, %s, %s, pawn=%s, iterations=%s -- UUID = %s",
+                areaId, serverId, characterName, scaleFactors, iterationsNumber, uuid));
         Date stDate = new Date();
         ProcessBuilder pb = new ProcessBuilder("./simc",
                 String.format("armory=%s,%s,%s", areaId, serverId, characterName),
-                String.format("calculate_scale_factors=%s", scaleFactors),
+                String.format("calculate_scale_factors=%s", (scaleFactors ? "1" : "0")),
                 String.format("output=result/%s.log", uuid),
-                "iterations=1000",
+                String.format("iterations=%s", iterationsNumber),
                 String.format("json2=result/%s.json", uuid),
                 String.format("html=result/%s.html", uuid));
 
@@ -61,19 +55,17 @@ public class SimExecutor {
         proc = pb.start();
 
 
-        //BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 
         BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 
         String s = null;
-        //while ((s = stdInput.readLine()) != null)
-        //read any errors from the attempted command
-        //{
-        //    System.out.println(s);
-        //}
-
-        while ((s = stdError.readLine()) != null)
+        while ((s = stdInput.readLine()) != null)
         {
+            logger.debug(s);
+        }
+
+        while ((s = stdError.readLine()) != null) {
             logger.error(s);
         }
         logger.info(String.format("Simulation for %s,%s,%s ended in %s", areaId, serverId, characterName,
@@ -135,13 +127,13 @@ public class SimExecutor {
                 getAsJsonObject("collected_data").getAsJsonObject("dpse").
                 get("max").getAsDouble();
 
-        if (scaleFactors == 1) {
+        if (scaleFactors) {
             HashMap pawn = new HashMap();
             JsonObject inner = jsonObject.getAsJsonObject("sim").getAsJsonArray("players").get(0).getAsJsonObject().
                     getAsJsonObject("scale_factors");
             Set<String> keys = inner.keySet();
-            for (String key:
-                 keys) {
+            for (String key :
+                    keys) {
                 pawn.put(key, inner.get(key));
             }
             simResult.pawn = pawn;
@@ -149,16 +141,7 @@ public class SimExecutor {
 
         json = jsonParser.toJson(simResult);
 
-        return (type.equals("json") ? json : html);
-
-    }
-
-    public static void main(String[] args) {
-        try {
-            System.out.println(getResult("eu","borean-tundra",
-                    "мичикко","json", 1));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.html = html;
+        this.json = json;
     }
 }

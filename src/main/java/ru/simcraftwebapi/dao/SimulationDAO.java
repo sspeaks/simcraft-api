@@ -1,12 +1,9 @@
 package ru.simcraftwebapi.dao;
 
 import ru.simcraftwebapi.core.Simulation;
+import ru.simcraftwebapi.executor.SimExecutorRunner;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import javax.inject.Singleton;
 
 /*
@@ -15,29 +12,39 @@ import javax.inject.Singleton;
 @Singleton
 public class SimulationDAO {
 
-    private static final HashMap<String, Simulation> simulations = new HashMap<>();
+    private static final HashMap<UUID, Simulation> simulations = new HashMap<>();
 
     static {
     }
 
-    public static Simulation getSimulation(String identifier) {
+    public static Simulation getSimulation(UUID identifier) {
         if (!simulations.containsKey(identifier)) {
             return null;
         }
         return simulations.get(identifier);
     }
 
-//    public static Simulation addSimulation(String areaId, String serverId, String characterName ) {
-//        Simulation newSim = new Simulation(, simulationId, objectModel);
-//        simulations.put(simulationId, newSim);
-//        return newSim;
-//    }
+    public static UUID addSimulation(String areaId, String serverId, String characterName, boolean pawn, int iterNum) {
+        Simulation newSim = new Simulation(areaId, serverId, characterName, pawn, iterNum);
+        simulations.put(newSim.uuid, newSim);
+        return newSim.uuid;
+    }
 
-    public static boolean deleteSimulation(String simulationId){
+    public static boolean deleteSimulation(UUID simulationId){
         if (simulations.containsKey(simulationId)) {
             simulations.remove(simulationId);
             return true;
         }
         return false;
+    }
+
+    public static UUID getSimpleSimulationUUID() {
+        return UUID.randomUUID();
+    }
+
+    public static void SimulateAsync(UUID uuid) {
+        SimExecutorRunner simExecutorAsync = new SimExecutorRunner(getSimulation(uuid));
+        Thread t = new Thread(simExecutorAsync);
+        t.start();
     }
 }

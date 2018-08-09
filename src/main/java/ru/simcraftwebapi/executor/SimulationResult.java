@@ -1,4 +1,4 @@
-package ru.simcraftwebapi.core;
+package ru.simcraftwebapi.executor;
 
 import java.util.HashMap;
 import java.util.UUID;

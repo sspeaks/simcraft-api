@@ -2,7 +2,6 @@ package ru.simcraftwebapi.configs;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.simcraftwebapi.hibernate.HibernateWrapper;
 
 import java.util.Properties;
 
