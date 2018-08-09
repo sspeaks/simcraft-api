@@ -22,6 +22,7 @@ public class SimExecutor {
 
     public String json;
     public String html;
+    public boolean errorFlag = false;
 
     public void simulate(UUID uuid,
                            String areaId,
@@ -62,12 +63,23 @@ public class SimExecutor {
         String s = null;
         while ((s = stdInput.readLine()) != null)
         {
+            System.out.println(s);
             logger.debug(s);
         }
 
+        String err = "";
         while ((s = stdError.readLine()) != null) {
+            errorFlag = true;
             logger.error(s);
+            err += s + System.lineSeparator();
         }
+
+        if (errorFlag) {
+            this.html = err;
+            this.json = err;
+            return;
+        }
+
         logger.info(String.format("Simulation for %s,%s,%s ended in %s", areaId, serverId, characterName,
                 Duration.between(stDate.toInstant(), (new Date()).toInstant())));
 
@@ -76,6 +88,7 @@ public class SimExecutor {
         Path jsonPath = FileSystems.getDefault().getPath(workingPath + "result/", uuid + ".json");
         String json = String.join("", Files.readAllLines(jsonPath, StandardCharsets.UTF_8));
         Path logPath = FileSystems.getDefault().getPath(workingPath + "result/", uuid + ".log");
+        String log = String.join("", Files.readAllLines(logPath, StandardCharsets.UTF_8));
 
         if (Files.exists(htmlPath)) {
             Files.delete(htmlPath);
@@ -143,5 +156,11 @@ public class SimExecutor {
 
         this.html = html;
         this.json = json;
+    }
+
+    public String buildPawnString(SimulationResult res){
+        return null;
+        //rankings Wdps > Agi ~= AP > Haste > Mastery > Crit ~= Vers > WOHdps
+        //( Pawn: v1: "Мичикко-Assassination": Class=Rogue, Spec=Assassination, Agility=2.30, Ap=2.19, CritRating=1.48, HasteRating=2.03, MasteryRating=1.78, Versatility=1.45, Dps=11.87 )
     }
 }

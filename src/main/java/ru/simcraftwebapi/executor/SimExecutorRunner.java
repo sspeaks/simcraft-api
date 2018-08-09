@@ -23,6 +23,7 @@ public class SimExecutorRunner implements Runnable {
             sim.resultHtml = simExec.html;
             sim.resultJson = simExec.json;
             sim.isFinished = true;
+            sim.isError = simExec.errorFlag;
         } catch (IOException e) {
             logger.error(e.getMessage());
         }

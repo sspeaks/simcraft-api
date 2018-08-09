@@ -15,6 +15,7 @@ public class Simulation {
 
     public String resultJson;
     public String resultHtml;
+    public boolean isError;
 
     public Simulation(String areaId, String serverId, String characterName, boolean pawn, int iterNum) {
         this.uuid = UUID.randomUUID();

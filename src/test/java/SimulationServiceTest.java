@@ -50,12 +50,28 @@ public class SimulationServiceTest extends JerseyTest{
                 queryParam("character", "мичикко").
                 queryParam("type", "json").
                 queryParam("pawn", "true").
-                queryParam("iterations", "1000");
+                queryParam("iterations", "100");
         Response output = target.request().get();
         assertEquals("Should return status 200", 200, output.getStatus());
         String res = output.readEntity(String.class);
         assertNotNull("Should return json", res);
         logger.info(String.format("Test testOneSimulationWithPawn result is: %s", res));
+    }
+
+    @Test
+    public void testOneSimulationWithPawnAndError() {
+        WebTarget target = target("/simulate").
+                queryParam("ze", "eu").
+                queryParam("realm", "borean-tundra").
+                queryParam("character", "мичикко").
+                queryParam("type", "json").
+                queryParam("pawn", "true").
+                queryParam("iterations", "100");
+        Response output = target.request().get();
+        assertEquals("Should return status 500", 500, output.getStatus());
+        String res = output.readEntity(String.class);
+        assertEquals("Error: Option 'armory' with value 'null,borean-tundra,мичикко': Invalid region 'null'.\n", res);
+        logger.info(String.format("Test testOneSimulationWithPawnAndError result is: %s", res));
     }
 
     @Test

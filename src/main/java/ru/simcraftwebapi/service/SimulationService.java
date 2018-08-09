@@ -33,6 +33,9 @@ public class SimulationService {
             logger.error(e.getMessage());
             return Response.serverError().entity(e.getMessage()).build();
         }
+        if (simExec.errorFlag) {
+            return Response.serverError().entity(simExec.json).build();
+        }
         return Response.ok().entity(type.equals("json") ? simExec.json :simExec.html).build();
     }
 
