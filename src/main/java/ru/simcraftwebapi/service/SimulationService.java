@@ -22,11 +22,12 @@ public class SimulationService {
     public Response simulate(@QueryParam("zone") String areaId,
                                          @QueryParam("realm") String serverId,
                                          @QueryParam("character") String characterName,
-                                         @QueryParam("type") String type) {
+                                         @QueryParam("type") String type,
+                                         @DefaultValue("0")@QueryParam("pawn") int pawn) {
         logger.info(String.format("GET for %s %s %s %s", areaId, serverId, characterName, type));
         String json = null;
         try {
-            json = SimExecutor.getResult(areaId, serverId, characterName, type);
+            json = SimExecutor.getResult(areaId, serverId, characterName, type, pawn);
         } catch (IOException e) {
             logger.error(e.getMessage());
             return Response.serverError().entity(e.getMessage()).build();

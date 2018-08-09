@@ -22,14 +22,11 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class SimExecutor {
 
-    public static String getResult(String areaId, String serverId, String characterName, String type) throws IOException {
+    public static String getResult(String areaId, String serverId, String characterName, String type, int scaleFactors) throws IOException {
         final Logger logger = LoggerFactory.getLogger(SimExecutor.class);
 
         Simulation sim = new Simulation();
@@ -46,7 +43,7 @@ public class SimExecutor {
         Date stDate = new Date();
         ProcessBuilder pb = new ProcessBuilder("./simc",
                 String.format("armory=%s,%s,%s", areaId, serverId, characterName),
-                "calculate_scale_factors=0",
+                String.format("calculate_scale_factors=%s", scaleFactors),
                 String.format("output=result/%s.log", uuid),
                 "iterations=1000",
                 String.format("json2=result/%s.json", uuid),
@@ -86,11 +83,18 @@ public class SimExecutor {
         String html = String.join("", Files.readAllLines(htmlPath, StandardCharsets.UTF_8));
         Path jsonPath = FileSystems.getDefault().getPath(workingPath + "result/", uuid + ".json");
         String json = String.join("", Files.readAllLines(jsonPath, StandardCharsets.UTF_8));
-
-        Files.delete(htmlPath);
-        Files.delete(jsonPath);
         Path logPath = FileSystems.getDefault().getPath(workingPath + "result/", uuid + ".log");
-        Files.delete(logPath);
+
+        if (Files.exists(htmlPath)) {
+            Files.delete(htmlPath);
+        }
+        if (Files.exists(jsonPath)) {
+            Files.delete(jsonPath);
+        }
+        if (Files.exists(logPath)) {
+            Files.delete(logPath);
+        }
+
 
         //парсим json в SimulationResult
         SimulationResult simResult = new SimulationResult();
@@ -131,6 +135,18 @@ public class SimExecutor {
                 getAsJsonObject("collected_data").getAsJsonObject("dpse").
                 get("max").getAsDouble();
 
+        if (scaleFactors == 1) {
+            HashMap pawn = new HashMap();
+            JsonObject inner = jsonObject.getAsJsonObject("sim").getAsJsonArray("players").get(0).getAsJsonObject().
+                    getAsJsonObject("scale_factors");
+            Set<String> keys = inner.keySet();
+            for (String key:
+                 keys) {
+                pawn.put(key, inner.get(key));
+            }
+            simResult.pawn = pawn;
+        }
+
         json = jsonParser.toJson(simResult);
 
         return (type.equals("json") ? json : html);
@@ -140,8 +156,7 @@ public class SimExecutor {
     public static void main(String[] args) {
         try {
             System.out.println(getResult("eu","borean-tundra",
-                    "мичикко",
-                    MediaType.APPLICATION_XML));
+                    "мичикко","json", 1));
         } catch (IOException e) {
             e.printStackTrace();
         }

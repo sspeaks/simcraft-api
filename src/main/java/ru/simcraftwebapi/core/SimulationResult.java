@@ -1,5 +1,6 @@
 package ru.simcraftwebapi.core;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class SimulationResult {
@@ -12,4 +13,5 @@ public class SimulationResult {
     public double dpse;
     public double dpsemin;
     public double dpsemax;
+    public HashMap pawn;
 }
