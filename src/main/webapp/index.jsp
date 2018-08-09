@@ -1,5 +1,5 @@
 <html>
 <body>
-<h2>simcraftwebapi</h2>
+<h2>Simulation Craft Web API welcome page</h2>
 </body>
 </html>
