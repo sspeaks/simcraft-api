@@ -3,6 +3,11 @@ package ru.simcraftwebapi.executor;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.text.StringEscapeUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.simcraftwebapi.configs.AppConfig;
@@ -149,6 +154,7 @@ public class SimExecutor {
                     keys) {
                 pawn.put(key, inner.get(key));
             }
+            simResult.pawnString = GetPawnString(html);
             simResult.pawn = pawn;
         }
 
@@ -156,6 +162,18 @@ public class SimExecutor {
 
         this.html = html;
         this.json = json;
+    }
+
+    private String GetPawnString(String html) {
+        Document doc = Jsoup.parse(html, "UTF-8");
+        Elements elements = doc.select("tr > td");
+        for(Element element: elements) {
+            String pawnString = element.html();
+            if (pawnString.contains("Pawn")) {
+                return StringEscapeUtils.unescapeHtml4(pawnString);
+            }
+        }
+        return "No Pawn string found";
     }
 
     public String buildPawnString(SimulationResult res){
