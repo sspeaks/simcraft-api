@@ -42,7 +42,7 @@ public class SimulationService {
     //return uuid of launched sim
     @GET
     @Path("/simulate/async")
-    @Produces({ MediaType.TEXT_PLAIN})
+    @Produces({ MediaType.APPLICATION_JSON})
     public Response addNewSimulationToQueue(@QueryParam("zone") String areaId,
                                             @QueryParam("realm") String serverId,
                                             @QueryParam("character") String characterName,
@@ -51,19 +51,19 @@ public class SimulationService {
                                             @DefaultValue("1000")@QueryParam("iterations") int iterNum) {
         UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, pawn, iterNum);
         SimulationDAO.SimulateAsync(uuid);
-        return Response.ok().entity(uuid.toString()).build();
+        return Response.ok().entity(String.format("{\"uuid\":\"%s\"}", uuid.toString())).build();
     }
 
     //returns html or json of finished sim, if not - returns json with "not finished" status
     @GET
     @Path("/simulate/async/result")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
     public Response getSimulationResultFromQueue(@QueryParam("uuid") UUID uuid,
                                                   @QueryParam("type") String type,
                                                   @DefaultValue("true")@QueryParam("delete") boolean deleteNeeded) {
         Simulation sim = SimulationDAO.getSimulation(uuid);
         if (sim == null) {
-            return Response.status(404).entity(String.format("Simulation %s not found", uuid)).build();
+            return Response.status(404).entity(String.format("{ \"message\": \"Simulation %s not found\"}", uuid)).build();
         }
         String result;
         if (sim.isFinished) {
@@ -71,7 +71,7 @@ public class SimulationService {
             if (deleteNeeded) { SimulationDAO.deleteSimulation(uuid); }
         }
         else {
-            result = String.format("Simulation uuid=%s is in progress", uuid);
+            result = String.format("{\"message\": \"Simulation uuid=%s is in progress\"}", uuid);
         }
         return Response.ok().entity(result).build();
     }
