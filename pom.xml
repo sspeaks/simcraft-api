@@ -20,8 +20,10 @@
     </properties>
 
 
+
     <url>http://maven.apache.org</url>
     <build>
+        <finalName>simcraft-api</finalName>
         <!--<finalName>ru.rules.engine</finalName>-->
         <plugins>
             <!-- Плагин для локального запуска через Maven TODO потом убрать-->
@@ -35,13 +37,32 @@
                 </configuration>
             </plugin>
             <!-- Сборка war файла -->
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
                     <warName>simcraft-api</warName>
                 </configuration>
+            </plugin>-->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete file="${project.build.outputDirectory}/config.cfg"/>
+                                <delete file="${project.build.outputDirectory}/config.prod.cfg"/>
+                                <copy file="src/main/resources/config.prod.cfg"
+                                      tofile="${project.build.outputDirectory}/config.cfg"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Настройка компиляции проекта -->
             <plugin>
@@ -49,6 +70,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
             </plugin>
+
+
             <!-- Копирование зависимотей в папку lib/ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -73,6 +96,7 @@
             </plugin>
         </plugins>
     </build>
+
 
     <dependencies>
         <dependency>
