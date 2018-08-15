@@ -18,7 +18,8 @@ public class SimulationService {
 
     @GET
     @Path("/simulate")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+    @Produces({"application/json;charset=utf-8", "text/html;charset=utf-8"})
+    //@Produces({ MediaType.APPLICATION_JSON + ";charset=utf-8", MediaType.TEXT_HTML})
     public Response simulate(@QueryParam("zone") String areaId,
                                          @QueryParam("realm") String serverId,
                                          @QueryParam("character") String characterName,
@@ -42,7 +43,8 @@ public class SimulationService {
     //return uuid of launched sim
     @GET
     @Path("/simulate/async")
-    @Produces({ MediaType.APPLICATION_JSON})
+    @Produces({"application/json;charset=utf-8"})
+    //@Produces({ MediaType.APPLICATION_JSON})
     public Response addNewSimulationToQueue(@QueryParam("zone") String areaId,
                                             @QueryParam("realm") String serverId,
                                             @QueryParam("character") String characterName,
@@ -57,7 +59,8 @@ public class SimulationService {
     //returns html or json of finished sim, if not - returns json with "not finished" status
     @GET
     @Path("/simulate/async/result")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+    @Produces({"application/json;charset=utf-8", "text/html;charset=utf-8"})
+    //@Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
     public Response getSimulationResultFromQueue(@QueryParam("uuid") UUID uuid,
                                                   @QueryParam("type") String type,
                                                   @DefaultValue("true")@QueryParam("delete") boolean deleteNeeded) {

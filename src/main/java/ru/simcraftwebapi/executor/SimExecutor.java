@@ -1,6 +1,7 @@
 package ru.simcraftwebapi.executor;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.text.StringEscapeUtils;
@@ -74,6 +75,7 @@ public class SimExecutor {
 
         String err = "";
         while ((s = stdError.readLine()) != null) {
+            if (s.contains("uses drop-level based scaling")) { continue; } //todo костыль для обхода проблем с lvl based item scaling
             errorFlag = true;
             logger.error(s);
             err += s + System.lineSeparator();
@@ -81,7 +83,7 @@ public class SimExecutor {
 
         if (errorFlag) {
             this.html = err;
-            this.json = err;
+            this.json = String.format("{\"error\":\"%s\"", err);
             return;
         }
 
@@ -109,7 +111,7 @@ public class SimExecutor {
         //парсим json в SimulationResult
         SimulationResult simResult = new SimulationResult();
 
-        Gson jsonParser = new Gson();
+        Gson jsonParser = new GsonBuilder().disableHtmlEscaping().create();
 
         JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
 
