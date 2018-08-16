@@ -45,6 +45,25 @@
                     <warName>simcraft-api</warName>
                 </configuration>
             </plugin>-->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete file="${project.build.outputDirectory}/config.cfg"/>
+                                <delete file="${project.build.outputDirectory}/config.prod.cfg"/>
+                                <copy file="src/main/resources/config.prod.cfg"
+                                      tofile="${project.build.outputDirectory}/config.cfg"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- Настройка компиляции проекта -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
