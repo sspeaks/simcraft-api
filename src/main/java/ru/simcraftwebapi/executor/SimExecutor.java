@@ -98,13 +98,13 @@ public class SimExecutor {
         String log = String.join("", Files.readAllLines(logPath, StandardCharsets.UTF_8));
 
         if (Files.exists(htmlPath)) {
-            Files.delete(htmlPath);
+            //Files.delete(htmlPath);
         }
         if (Files.exists(jsonPath)) {
-            Files.delete(jsonPath);
+            //Files.delete(jsonPath);
         }
         if (Files.exists(logPath)) {
-            Files.delete(logPath);
+            //Files.delete(logPath);
         }
 
 
@@ -118,7 +118,7 @@ public class SimExecutor {
         simResult.uuid = uuid;
         simResult.engineVersion = jsonObject.get("version").getAsString();
         simResult.wowVersion = jsonObject.getAsJsonObject("sim").
-                getAsJsonObject("options").getAsJsonObject("dbc").getAsJsonObject("bfa-BETA").
+                getAsJsonObject("options").getAsJsonObject("dbc").getAsJsonObject("Live").
                 get("wow_version").getAsString();
 
         simResult.dps = jsonObject.getAsJsonObject("sim").

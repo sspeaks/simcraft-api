@@ -10,8 +10,5 @@
         <module name="simcraftwebapi" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="simcraftwebapi" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
