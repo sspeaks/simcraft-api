@@ -19,7 +19,7 @@ public class SimExecutorRunner implements Runnable {
     public void run() {
         SimExecutor simExec = new SimExecutor();
         try {
-            simExec.simulate(sim.uuid, sim.areaId, sim.serverId, sim.characterName, sim.pawn, sim.iterNum);
+            simExec.simulate(sim.uuid, sim.areaId, sim.serverId, sim.characterName, sim.talents,  sim.pawn, sim.iterNum);
             sim.resultHtml = simExec.html;
             sim.resultJson = simExec.json;
             sim.isFinished = true;

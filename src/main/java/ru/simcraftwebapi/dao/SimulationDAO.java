@@ -24,8 +24,8 @@ public class SimulationDAO {
         return simulations.get(identifier);
     }
 
-    public static UUID addSimulation(String areaId, String serverId, String characterName, boolean pawn, int iterNum) {
-        Simulation newSim = new Simulation(areaId, serverId, characterName, pawn, iterNum);
+    public static UUID addSimulation(String areaId, String serverId, String characterName, String talents, boolean pawn, int iterNum) {
+        Simulation newSim = new Simulation(areaId, serverId, characterName, talents, pawn, iterNum);
         simulations.put(newSim.uuid, newSim);
         return newSim.uuid;
     }

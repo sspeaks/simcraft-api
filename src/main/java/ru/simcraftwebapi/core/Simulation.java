@@ -16,14 +16,16 @@ public class Simulation {
     public String resultJson;
     public String resultHtml;
     public boolean isError;
+    public String talents;
 
-    public Simulation(String areaId, String serverId, String characterName, boolean pawn, int iterNum) {
+    public Simulation(String areaId, String serverId, String characterName, String talents, boolean pawn, int iterNum) {
         this.uuid = UUID.randomUUID();
         this.areaId = areaId;
         this.serverId = serverId;
         this.characterName = characterName;
         this.pawn = pawn;
         this.iterNum = iterNum;
+        this.talents = talents;
     }
 
     public String getResult(String type) {

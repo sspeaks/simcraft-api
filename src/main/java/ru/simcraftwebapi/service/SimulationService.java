@@ -23,13 +23,14 @@ public class SimulationService {
     public Response simulate(@QueryParam("zone") String areaId,
                                          @QueryParam("realm") String serverId,
                                          @QueryParam("character") String characterName,
+                                         @DefaultValue("")@QueryParam("talents") String talents,
                                          @QueryParam("type") String type,
                                          @DefaultValue("false")@QueryParam("pawn") boolean pawn,
                                          @DefaultValue("1000")@QueryParam("iterations") int iterNum) {
         logger.info(String.format("GET for %s %s %s %s", areaId, serverId, characterName, type));
         SimExecutor simExec = new SimExecutor();
         try {
-            simExec.simulate(SimulationDAO.getSimpleSimulationUUID(), areaId, serverId, characterName, pawn, iterNum);
+            simExec.simulate(SimulationDAO.getSimpleSimulationUUID(), areaId, serverId, characterName, talents,  pawn, iterNum);
         } catch (IOException e) {
             logger.error(e.getMessage());
             return Response.serverError().entity(e.getMessage()).build();
@@ -48,10 +49,11 @@ public class SimulationService {
     public Response addNewSimulationToQueue(@QueryParam("zone") String areaId,
                                             @QueryParam("realm") String serverId,
                                             @QueryParam("character") String characterName,
+                                            @DefaultValue("")@QueryParam("talents") String talents,
                                             @QueryParam("type") String type,
                                             @DefaultValue("false")@QueryParam("pawn") boolean pawn,
                                             @DefaultValue("1000")@QueryParam("iterations") int iterNum) {
-        UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, pawn, iterNum);
+        UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, talents, pawn, iterNum);
         SimulationDAO.SimulateAsync(uuid);
         return Response.ok().entity(String.format("{\"uuid\":\"%s\"}", uuid.toString())).build();
     }

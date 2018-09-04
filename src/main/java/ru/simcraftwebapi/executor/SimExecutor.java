@@ -34,22 +34,29 @@ public class SimExecutor {
                            String areaId,
                            String serverId,
                            String characterName,
+                           String talents,
                            boolean scaleFactors,
                            int iterationsNumber) throws IOException {
         final Logger logger = LoggerFactory.getLogger(SimExecutor.class);
 
 
-        logger.info(String.format("Starting simulation for %s, %s, %s, pawn=%s, iterations=%s -- UUID = %s",
-                areaId, serverId, characterName, scaleFactors, iterationsNumber, uuid));
+        logger.info(String.format("Starting simulation for %s, %s, %s, pawn=%s, iterations=%s, talents=%s -- UUID = %s",
+                areaId, serverId, characterName, scaleFactors, iterationsNumber, talents, uuid));
         Date stDate = new Date();
-        ProcessBuilder pb = new ProcessBuilder("./simc",
-                String.format("armory=%s,%s,%s", areaId, serverId, characterName),
-                String.format("calculate_scale_factors=%s", (scaleFactors ? "1" : "0")),
-                String.format("output=result/%s.log", uuid),
-                String.format("iterations=%s", iterationsNumber),
-                String.format("json2=result/%s.json", uuid),
-                String.format("html=result/%s.html", uuid));
+        List<String> cmd = new ArrayList<>();
 
+        cmd.add("./simc");
+        cmd.add(String.format("armory=%s,%s,%s", areaId, serverId, characterName));
+        cmd.add(String.format("calculate_scale_factors=%s", (scaleFactors ? "1" : "0")));
+        if (!talents.equals("")) {
+            cmd.add(String.format("talents=%s", talents));
+        }
+        cmd.add(String.format("output=result/%s.log", uuid));
+        cmd.add(String.format("iterations=%s", iterationsNumber));
+        cmd.add(String.format("json2=result/%s.json", uuid));
+        cmd.add(String.format("html=result/%s.html", uuid));
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
         Map<String, String> env = pb.environment();
         env.clear();
 
