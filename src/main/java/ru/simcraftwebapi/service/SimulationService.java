@@ -68,7 +68,11 @@ public class SimulationService {
                                                   @DefaultValue("true")@QueryParam("delete") boolean deleteNeeded) {
         Simulation sim = SimulationDAO.getSimulation(uuid);
         if (sim == null) {
-            return Response.status(404).entity(String.format("{ \"message\": \"Simulation %s not found\"}", uuid)).build();
+            return Response.status(404).entity(String.format("{ " +
+                    "\"uuid\": \"%s\"," +
+                    "\"status\": -1," +
+                    "\"message\": \"Simulation uuid=%s not found\"" +
+                    "}", uuid, uuid)).build();
         }
         String result;
         if (sim.isFinished) {
@@ -76,7 +80,11 @@ public class SimulationService {
             if (deleteNeeded) { SimulationDAO.deleteSimulation(uuid); }
         }
         else {
-            result = String.format("{\"message\": \"Simulation uuid=%s is in progress\"}", uuid);
+            result = String.format("{" +
+                    "\"uuid\": \"%s\"," +
+                    "\"status\": 1," +
+                    "\"message\": \"Simulation uuid=%s is in progress\"" +
+                    "}", uuid, uuid);
         }
         return Response.ok().entity(result).build();
     }
