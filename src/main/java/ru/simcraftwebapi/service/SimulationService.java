@@ -53,6 +53,7 @@ public class SimulationService {
                                             @QueryParam("type") String type,
                                             @DefaultValue("false")@QueryParam("pawn") boolean pawn,
                                             @DefaultValue("1000")@QueryParam("iterations") int iterNum) {
+        logger.info(String.format("GET async for %s %s %s %s %s %s %s", areaId, serverId, characterName, talents, type, pawn, iterNum));
         UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, talents, pawn, iterNum);
         SimulationDAO.SimulateAsync(uuid);
         return Response.ok().entity(String.format("{\"uuid\":\"%s\"}", uuid.toString())).build();
@@ -66,6 +67,7 @@ public class SimulationService {
     public Response getSimulationResultFromQueue(@QueryParam("uuid") UUID uuid,
                                                   @QueryParam("type") String type,
                                                   @DefaultValue("true")@QueryParam("delete") boolean deleteNeeded) {
+        logger.info(String.format("GET async result for %s %s delete=%s", uuid, type, deleteNeeded));
         Simulation sim = SimulationDAO.getSimulation(uuid);
         if (sim == null) {
             return Response.status(404).entity(String.format("{ " +

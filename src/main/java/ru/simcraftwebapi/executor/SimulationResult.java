@@ -7,6 +7,7 @@ public class SimulationResult {
     public UUID uuid;
     public String engineVersion;
     public String wowVersion;
+    public String talents;
     public double dps;
     public double dpsmin;
     public double dpsmax;
