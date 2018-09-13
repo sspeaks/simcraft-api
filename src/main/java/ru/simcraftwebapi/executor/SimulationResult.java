@@ -16,4 +16,5 @@ public class SimulationResult {
     public double dpsemax;
     public HashMap pawn;
     public String pawnString;
+    public double dummyDPS;
 }

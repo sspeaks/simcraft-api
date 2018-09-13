@@ -17,8 +17,11 @@ public class Simulation {
     public String resultHtml;
     public boolean isError;
     public String talents;
+    public boolean dummy;
+    public String resultJsonForDummy;
 
-    public Simulation(String areaId, String serverId, String characterName, String talents, boolean pawn, int iterNum) {
+    public Simulation(String areaId, String serverId, String characterName, String talents, boolean pawn,
+                      int iterNum, boolean withDummy) {
         this.uuid = UUID.randomUUID();
         this.areaId = areaId;
         this.serverId = serverId;
@@ -26,6 +29,7 @@ public class Simulation {
         this.pawn = pawn;
         this.iterNum = iterNum;
         this.talents = talents;
+        this.dummy = withDummy;
     }
 
     public String getResult(String type) {

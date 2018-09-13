@@ -29,6 +29,7 @@ public class SimExecutor {
     public String json;
     public String html;
     public boolean errorFlag = false;
+    public SimulationResult simResult;
 
     public void simulate(UUID uuid,
                            String areaId,
@@ -36,12 +37,14 @@ public class SimExecutor {
                            String characterName,
                            String talents,
                            boolean scaleFactors,
-                           int iterationsNumber) throws IOException {
+                           int iterationsNumber,
+                           boolean dummy) throws IOException {
         final Logger logger = LoggerFactory.getLogger(SimExecutor.class);
 
 
-        logger.info(String.format("Starting simulation for %s, %s, %s, pawn=%s, iterations=%s, talents=%s -- UUID = %s",
-                areaId, serverId, characterName, scaleFactors, iterationsNumber, talents, uuid));
+        logger.info(String.format("Starting simulation for %s, %s, %s, pawn=%s, iterations=%s, talents=%s," +
+                        " dummy=%s -- UUID = %s",
+                areaId, serverId, characterName, scaleFactors, iterationsNumber, talents, dummy, uuid));
         Date stDate = new Date();
         List<String> cmd = new ArrayList<>();
 
@@ -51,6 +54,7 @@ public class SimExecutor {
         if (!talents.equals("")) {
             cmd.add(String.format("talents=%s", talents));
         }
+        cmd.add(String.format("optimal_raid=%s", (dummy ? "0" : "1")));
         cmd.add(String.format("output=result/%s.log", uuid));
         cmd.add(String.format("iterations=%s", iterationsNumber));
         cmd.add(String.format("json2=result/%s.json", uuid));
@@ -173,6 +177,7 @@ public class SimExecutor {
 
         this.html = html;
         this.json = json;
+        this.simResult = simResult;
     }
 
     private String GetPawnString(String html) {

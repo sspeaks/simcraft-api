@@ -26,11 +26,12 @@ public class SimulationService {
                                          @DefaultValue("")@QueryParam("talents") String talents,
                                          @QueryParam("type") String type,
                                          @DefaultValue("false")@QueryParam("pawn") boolean pawn,
-                                         @DefaultValue("1000")@QueryParam("iterations") int iterNum) {
+                                         @DefaultValue("1000")@QueryParam("iterations") int iterNum,
+                                         @DefaultValue("false")@QueryParam("dummy") boolean withDummy) {
         logger.info(String.format("GET for %s %s %s %s", areaId, serverId, characterName, type));
         SimExecutor simExec = new SimExecutor();
         try {
-            simExec.simulate(SimulationDAO.getSimpleSimulationUUID(), areaId, serverId, characterName, talents,  pawn, iterNum);
+            simExec.simulate(SimulationDAO.getSimpleSimulationUUID(), areaId, serverId, characterName, talents,  pawn, iterNum, withDummy);
         } catch (IOException e) {
             logger.error(e.getMessage());
             return Response.serverError().entity(e.getMessage()).build();
@@ -52,9 +53,10 @@ public class SimulationService {
                                             @DefaultValue("")@QueryParam("talents") String talents,
                                             @QueryParam("type") String type,
                                             @DefaultValue("false")@QueryParam("pawn") boolean pawn,
-                                            @DefaultValue("1000")@QueryParam("iterations") int iterNum) {
-        logger.info(String.format("GET async for %s %s %s %s %s %s %s", areaId, serverId, characterName, talents, type, pawn, iterNum));
-        UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, talents, pawn, iterNum);
+                                            @DefaultValue("1000")@QueryParam("iterations") int iterNum,
+                                            @DefaultValue("false")@QueryParam("dummy") boolean withDummy) {
+        logger.info(String.format("GET async for %s %s %s %s %s %s %s %s", areaId, serverId, characterName, talents, type, pawn, iterNum, withDummy));
+        UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, talents, pawn, iterNum, withDummy);
         SimulationDAO.SimulateAsync(uuid);
         return Response.ok().entity(String.format("{\"uuid\":\"%s\"}", uuid.toString())).build();
     }

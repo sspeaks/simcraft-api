@@ -1,5 +1,7 @@
 package ru.simcraftwebapi.executor;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.simcraftwebapi.core.Simulation;
@@ -19,11 +21,20 @@ public class SimExecutorRunner implements Runnable {
     public void run() {
         SimExecutor simExec = new SimExecutor();
         try {
-            simExec.simulate(sim.uuid, sim.areaId, sim.serverId, sim.characterName, sim.talents,  sim.pawn, sim.iterNum);
+            simExec.simulate(sim.uuid, sim.areaId, sim.serverId, sim.characterName, sim.talents,  sim.pawn, sim.iterNum, false);
+            Gson jsonParser = new GsonBuilder().disableHtmlEscaping().create();
+            SimulationResult simResult = simExec.simResult;
             sim.resultHtml = simExec.html;
             sim.resultJson = simExec.json;
-            sim.isFinished = true;
             sim.isError = simExec.errorFlag;
+            if (sim.dummy) {
+                simExec.simulate(sim.uuid, sim.areaId, sim.serverId, sim.characterName, sim.talents,  false, 1000, true);
+                sim.resultJsonForDummy = simExec.json;
+                sim.isError = sim.isError || simExec.errorFlag;
+                simResult.dummyDPS = simExec.simResult.dps;
+            }
+            sim.resultJson = jsonParser.toJson(simResult);
+            sim.isFinished = true;
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
