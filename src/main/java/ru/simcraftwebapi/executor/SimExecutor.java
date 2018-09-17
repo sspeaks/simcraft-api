@@ -41,6 +41,7 @@ public class SimExecutor {
                            boolean dummy) throws IOException {
         final Logger logger = LoggerFactory.getLogger(SimExecutor.class);
 
+        SimulationResult simResult = new SimulationResult();
 
         logger.info(String.format("Starting simulation for %s, %s, %s, pawn=%s, iterations=%s, talents=%s," +
                         " dummy=%s -- UUID = %s",
@@ -120,7 +121,6 @@ public class SimExecutor {
 
 
         //парсим json в SimulationResult
-        SimulationResult simResult = new SimulationResult();
 
         Gson jsonParser = new GsonBuilder().disableHtmlEscaping().create();
 

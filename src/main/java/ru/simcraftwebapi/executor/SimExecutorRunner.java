@@ -27,16 +27,29 @@ public class SimExecutorRunner implements Runnable {
             sim.resultHtml = simExec.html;
             sim.resultJson = simExec.json;
             sim.isError = simExec.errorFlag;
-            if (sim.dummy) {
+            if (sim.dummy && !simExec.errorFlag) {
                 simExec.simulate(sim.uuid, sim.areaId, sim.serverId, sim.characterName, sim.talents,  false, 1000, true);
                 sim.resultJsonForDummy = simExec.json;
                 sim.isError = sim.isError || simExec.errorFlag;
                 simResult.dummyDPS = simExec.simResult.dps;
             }
             sim.resultJson = jsonParser.toJson(simResult);
+            if (simExec.errorFlag) {
+                sim.resultJson = String.format("{ " +
+                        "\"uuid\": \"%s\"," +
+                        "\"status\": -2," +
+                        "\"message\": \"" + simExec.html.replace("\"", "'").replace("\n", "") + "\"" +
+                        "}", sim.uuid);
+            }
             sim.isFinished = true;
         } catch (IOException e) {
             logger.error(e.getMessage());
+            sim.resultJson = String.format("{ " +
+                    "\"uuid\": \"%s\"," +
+                    "\"status\": -2," +
+                    "\"message\": \"" + e.getMessage().replace("\"", "'") + "\"" +
+                    "}", sim.uuid);
+            sim.isFinished = true;
         }
     }
 }
