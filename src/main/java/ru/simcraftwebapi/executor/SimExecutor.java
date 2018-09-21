@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -161,16 +162,22 @@ public class SimExecutor {
                 get("max").getAsDouble();
 
         if (scaleFactors) {
-            HashMap pawn = new HashMap();
+            HashMap pawnMap = new HashMap();
             JsonObject inner = jsonObject.getAsJsonObject("sim").getAsJsonArray("players").get(0).getAsJsonObject().
                     getAsJsonObject("scale_factors");
             Set<String> keys = inner.keySet();
             for (String key :
                     keys) {
-                pawn.put(key, inner.get(key));
+
+                if (CheckIfPawnDeprecated(key)) {
+                    continue;
+                }
+
+                pawnMap.put(key, Double.parseDouble(inner.get(key).toString()));
             }
+
             simResult.pawnString = GetPawnString(html);
-            simResult.pawn = pawn;
+            simResult.pawn = sortMapByValue(pawnMap);
         }
 
         json = jsonParser.toJson(simResult);
@@ -178,6 +185,67 @@ public class SimExecutor {
         this.html = html;
         this.json = json;
         this.simResult = simResult;
+    }
+
+    private Map<String, Double> sortMapByValue(HashMap pawnMap) {
+        //String res = "{";
+        Map<String, Double> res = new HashMap<>();
+
+        while (!pawnMap.isEmpty()) {
+            //if (!res.equals("{")) { res+= ","; }
+            Set<String> keys = pawnMap.keySet();
+            String maxKey = "";
+            double max = -100;
+            for (String key :
+                    keys) {
+                double val = (double) pawnMap.get(key);
+                if (val > max) {
+                    maxKey = key;
+                    max = val;
+                }
+            }
+            //{"Agi":0.7136935134157123,"Mastery":0.15567589055059644,"Vers":0.6017676584384817,"Crit":0.3876516537011335,"Haste":0.4915296534211259}
+            if (!maxKey.equals("")) {
+                //res += String.format("\"%s\": %s" , maxKey, pawnMap.get(maxKey));
+                res.put(maxKey, (double)pawnMap.get(maxKey));
+                pawnMap.remove(maxKey);
+                keys.remove(maxKey);
+            }
+        }
+        res = sortByValue(res);
+        return res;
+    }
+
+    private static Map<String, Double> sortByValue(Map<String, Double> unsortedMap) {
+
+        List<Map.Entry<String, Double>> list =
+                new LinkedList<>(unsortedMap.entrySet());
+        Collections.sort(list, (o1, o2) -> (o2.getValue()).compareTo(o1.getValue()));
+        Map<String, Double> sortedMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Double> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+        return sortedMap;
+    }
+
+
+    private boolean CheckIfPawnDeprecated(String key) {
+        boolean res = false;
+        switch (key) {
+            case "SP": //spell power
+                res = true;
+                break;
+            case "WOHdps": //Weapon offhand dps
+                res = true;
+                break;
+            case "Wdps": //Main hand weapon dps
+                res = true;
+                break;
+            case "AP": //attack power
+                res = true;
+                break;
+        }
+        return res;
     }
 
     private String GetPawnString(String html) {
@@ -195,6 +263,7 @@ public class SimExecutor {
     public String buildPawnString(SimulationResult res){
         return null;
         //rankings Wdps > Agi ~= AP > Haste > Mastery > Crit ~= Vers > WOHdps
-        //( Pawn: v1: "Мичикко-Assassination": Class=Rogue, Spec=Assassination, Agility=2.30, Ap=2.19, CritRating=1.48, HasteRating=2.03, MasteryRating=1.78, Versatility=1.45, Dps=11.87 )
+        //( Pawn: v1: "Мичикко-Assassination": Class=Rogue, Spec=Assassination, Agility=2.30, Ap=2.19, CritRating=1.48,
+        // HasteRating=2.03, MasteryRating=1.78, Versatility=1.45, Dps=11.87 )
     }
 }
