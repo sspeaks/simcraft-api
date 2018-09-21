@@ -1,6 +1,8 @@
 package ru.simcraftwebapi.executor;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 public class SimulationResult {
@@ -14,7 +16,7 @@ public class SimulationResult {
     public double dpse;
     public double dpsemin;
     public double dpsemax;
-    public HashMap pawn;
+    public Map pawn;
     public String pawnString;
     public double dummyDPS;
 }
