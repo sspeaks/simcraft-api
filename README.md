@@ -1,6 +1,5 @@
-# WIP - Simulation Craft web REST api
+# Simulation Craft web REST api
 
-### ! The project development is in progress !
 
 Web REST API for simc project (https://github.com/simulationcraft/simc)
 
