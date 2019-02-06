@@ -9,7 +9,7 @@ COPY /target/simcraft-api.war /usr/local/tomcat/webapps/simcraft-api.war
 
 # Install dependencies for simc
 RUN apt-get update \
-    && apt-get install -qy git libssl-dev gcc make g++
+    && apt-get install -qy git libssl-dev libcurl4-openssl-dev gcc make g++
 
 # Build simc
 RUN mkdir -p /root/simcraft \
