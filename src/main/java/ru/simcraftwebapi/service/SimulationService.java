@@ -87,7 +87,7 @@ public class SimulationService {
             result = String.format("{" +
                     "\"uuid\": \"%s\"," +
                     "\"status\": 1," +
-                    "\"message\": \"Simulation uuid=%s is in progress\"" +
+                    "\"message\": \"Simulation uuid=%s has been started, but not yet finished\"" +
                     "}", uuid, uuid);
         }
         return Response.ok().entity(result).build();
