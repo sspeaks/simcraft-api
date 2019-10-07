@@ -84,7 +84,7 @@ with following parameters
     
 Note* - undeleted results will remain on server
 
-While simulation is in progress `/result` will return `"Simulation uuid=UUID is in progress"`
+While simulation is in progress `/result` will return `"Simulation uuid=%s has been started, but not yet finished"`
 
 When simulation results are ready - it will return JSON or HTML, depending on input `type` parameter
 
