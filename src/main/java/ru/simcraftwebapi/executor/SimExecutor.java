@@ -81,35 +81,16 @@ public class SimExecutor {
         Process proc = null;
         proc = pb.start();
         proc.waitFor();
-//        System.out.println(IOUtils.toString(proc.getInputStream()));
-//        System.out.println(IOUtils.toString(proc.getErrorStream()));
 
-//        System.out.println(proc.waitFor());
+        errorFlag = proc.exitValue() != 0;
+        if(errorFlag) {
+            JsonObject result = new JsonObject();
+            result.addProperty("error", "simc did not succeed");
+            json = result.getAsString();
+            return;
+        }
 
-//        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-//
-//        BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-//
-//        String s = null;
-//        while ((s = stdInput.readLine()) != null)
-//        {
-//            System.out.println(s);
-//            logger.debug(s);
-//        }
-//
-//        String err = "";
-//        while ((s = stdError.readLine()) != null) {
-//            if (s.contains("uses drop-level based scaling")) { continue; } //todo костыль для обхода проблем с lvl based item scaling
-//            errorFlag = true;
-//            logger.error(s);
-//            err += s + System.lineSeparator();
-//        }
-//
-//        if (errorFlag) {
-//            this.html = err;
-//            this.json = String.format("{\"error\":\"%s\"", err);
-//            return;
-//        }
+
 
 
         logger.info(String.format("Simulation for %s,%s,%s ended in %s", areaId, serverId, characterName,

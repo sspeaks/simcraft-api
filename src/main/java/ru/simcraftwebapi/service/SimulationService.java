@@ -1,5 +1,6 @@
 package ru.simcraftwebapi.service;
 
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.simcraftwebapi.core.Simulation;
@@ -30,6 +31,18 @@ public class SimulationService {
                                          @DefaultValue("false")@QueryParam("pawn") boolean pawn,
                                          @DefaultValue("1000")@QueryParam("iterations") int iterNum,
                                          @DefaultValue("false")@QueryParam("dummy") boolean withDummy) {
+        if(areaId == null) {
+            return Response.status(509, "zone is not provided").build();
+        }
+        if(serverId == null) {
+            return Response.status(509, "realm is not provided").build();
+        }
+        if(characterName == null) {
+            return Response.status(509, "character is not provided").build();
+        }
+        if(type == null) {
+            return Response.status(509, "type is not provided").build();
+        }
         logger.info(String.format("GET for %s %s %s %s", areaId, serverId, characterName, type));
         SimExecutor simExec = new SimExecutor();
         try {
@@ -57,23 +70,35 @@ public class SimulationService {
                                             @DefaultValue("false")@QueryParam("pawn") boolean pawn,
                                             @DefaultValue("1000")@QueryParam("iterations") int iterNum,
                                             @DefaultValue("false")@QueryParam("dummy") boolean withDummy) {
+        if(areaId == null) {
+            return Response.status(509, "zone is not provided").build();
+        }
+        if(serverId == null) {
+            return Response.status(509, "realm is not provided").build();
+        }
+        if(characterName == null) {
+            return Response.status(509, "character is not provided").build();
+        }
+        if(type == null) {
+            return Response.status(509, "type is not provided").build();
+        }
         logger.info(String.format("GET async for %s %s %s %s %s %s %s %s", areaId, serverId, characterName, talents, type, pawn, iterNum, withDummy));
         UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, talents, pawn, iterNum, withDummy);
         SimulationDAO.SimulateAsync(uuid);
         //(String.format("{\"uuid\":\"%s\"}", uuid.toString())).build();
-        return Response.accepted().header("Location", String.format("/simulate/async/status/%s", uuid.toString())).build();
+        return Response.accepted().header("Location", String.format("/simcraft-api/simulate/async/status/%s", uuid.toString())).build();
     }
 
     //returns html or json of finished sim, if not - returns json with "not finished" status
     @GET
-    @Path("/simulate/async/result")
+    @Path("/simulate/async/result/{uuid}")
     @Produces({"application/json;charset=utf-8", "text/html;charset=utf-8"})
     //@Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
-    public Response getSimulationResult(@QueryParam("uuid") UUID uuid,
-                                                  @QueryParam("type") String type,
+    public Response getSimulationResult(@PathParam("uuid") String uuid,
+                                                  @DefaultValue("json")@QueryParam("type") String type,
                                                   @DefaultValue("true")@QueryParam("delete") boolean deleteNeeded) {
         logger.info(String.format("GET async result for %s %s delete=%s", uuid, type, deleteNeeded));
-        Simulation sim = SimulationDAO.getSimulation(uuid);
+        Simulation sim = SimulationDAO.getSimulation(UUID.fromString(uuid));
         if (sim == null) {
             return Response.status(404).entity(String.format("{ " +
                     "\"uuid\": \"%s\"," +
@@ -84,7 +109,7 @@ public class SimulationService {
         String result;
         if (sim.isFinished) {
             result = sim.getResult(type);
-            if (deleteNeeded) { SimulationDAO.deleteSimulation(uuid); }
+            if (deleteNeeded) { SimulationDAO.deleteSimulation(UUID.fromString(uuid)); }
         }
         else {
             result = String.format("{" +
@@ -97,10 +122,11 @@ public class SimulationService {
     }
 
     @GET
-    @Path("/simulate/async/status")
-    public Response getSimulationStatus(@QueryParam("uuid") UUID uuid) {
+    @Path("/simulate/async/status/{uuid}")
+    @Produces({"application/json;charset=utf-8", "text/html;charset=utf-8"})
+    public Response getSimulationStatus(@PathParam("uuid") String uuid) {
         logger.info(String.format("GET async status for %s", uuid));
-        Simulation sim = SimulationDAO.getSimulation(uuid);
+        Simulation sim = SimulationDAO.getSimulation(UUID.fromString(uuid));
         if (sim == null) {
             return Response.status(404).entity(String.format("{ " +
                     "\"uuid\": \"%s\"," +
@@ -108,15 +134,16 @@ public class SimulationService {
                     "\"message\": \"Simulation uuid=%s not found\"" +
                     "}", uuid, uuid)).build();
         }
+        JsonObject result = new JsonObject();
         if (sim.isFinished) {
-            try {
-                return Response.seeOther(new URI(String.format("/simulate/async/result/%s", uuid))).build();
-            } catch (URISyntaxException e) {
-                return Response.serverError().build();
-            }
+            result.addProperty("status", "Done");
+            return Response.ok(result).header("Location", String.format("/simcraft-api/simulate/async/result/%s", uuid)).build();
         }
         else {
-            return Response.ok().header("Location", String.format("/simulate/async/status/%s", uuid)).build();
+            result.addProperty("status", "Pending");
+            return Response.ok(result)
+                    .header("Location", String.format("/simcraft-api/simulate/async/status/%s", uuid))
+                    .build();
         }
     }
 }
