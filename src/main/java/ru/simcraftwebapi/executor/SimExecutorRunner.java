@@ -42,7 +42,7 @@ public class SimExecutorRunner implements Runnable {
                         "}", sim.uuid);
             }
             sim.isFinished = true;
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             logger.error(e.getMessage());
             sim.resultJson = String.format("{ " +
                     "\"uuid\": \"%s\"," +

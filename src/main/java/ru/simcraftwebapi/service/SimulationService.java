@@ -10,6 +10,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 @Path("")
@@ -32,7 +34,7 @@ public class SimulationService {
         SimExecutor simExec = new SimExecutor();
         try {
             simExec.simulate(SimulationDAO.getSimpleSimulationUUID(), areaId, serverId, characterName, talents,  pawn, iterNum, withDummy);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             logger.error(e.getMessage());
             return Response.serverError().entity(e.getMessage()).build();
         }
@@ -58,7 +60,8 @@ public class SimulationService {
         logger.info(String.format("GET async for %s %s %s %s %s %s %s %s", areaId, serverId, characterName, talents, type, pawn, iterNum, withDummy));
         UUID uuid = SimulationDAO.addSimulation(areaId, serverId, characterName, talents, pawn, iterNum, withDummy);
         SimulationDAO.SimulateAsync(uuid);
-        return Response.ok().entity(String.format("{\"uuid\":\"%s\"}", uuid.toString())).build();
+        //(String.format("{\"uuid\":\"%s\"}", uuid.toString())).build();
+        return Response.accepted().header("Location", String.format("/simulate/async/status/%s", uuid.toString())).build();
     }
 
     //returns html or json of finished sim, if not - returns json with "not finished" status
@@ -66,7 +69,7 @@ public class SimulationService {
     @Path("/simulate/async/result")
     @Produces({"application/json;charset=utf-8", "text/html;charset=utf-8"})
     //@Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
-    public Response getSimulationResultFromQueue(@QueryParam("uuid") UUID uuid,
+    public Response getSimulationResult(@QueryParam("uuid") UUID uuid,
                                                   @QueryParam("type") String type,
                                                   @DefaultValue("true")@QueryParam("delete") boolean deleteNeeded) {
         logger.info(String.format("GET async result for %s %s delete=%s", uuid, type, deleteNeeded));
@@ -91,5 +94,29 @@ public class SimulationService {
                     "}", uuid, uuid);
         }
         return Response.ok().entity(result).build();
+    }
+
+    @GET
+    @Path("/simulate/async/status")
+    public Response getSimulationStatus(@QueryParam("uuid") UUID uuid) {
+        logger.info(String.format("GET async status for %s", uuid));
+        Simulation sim = SimulationDAO.getSimulation(uuid);
+        if (sim == null) {
+            return Response.status(404).entity(String.format("{ " +
+                    "\"uuid\": \"%s\"," +
+                    "\"status\": -1," +
+                    "\"message\": \"Simulation uuid=%s not found\"" +
+                    "}", uuid, uuid)).build();
+        }
+        if (sim.isFinished) {
+            try {
+                return Response.seeOther(new URI(String.format("/simulate/async/result/%s", uuid))).build();
+            } catch (URISyntaxException e) {
+                return Response.serverError().build();
+            }
+        }
+        else {
+            return Response.ok().header("Location", String.format("/simulate/async/status/%s", uuid)).build();
+        }
     }
 }

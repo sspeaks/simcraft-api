@@ -6,9 +6,6 @@ import ru.simcraftwebapi.executor.SimExecutorRunner;
 import java.util.*;
 import javax.inject.Singleton;
 
-/*
-Класс всех инстансов симуляций
- */
 @Singleton
 public class SimulationDAO {
 

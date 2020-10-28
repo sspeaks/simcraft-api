@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,7 +13,6 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.simcraftwebapi.configs.AppConfig;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +39,11 @@ public class SimExecutor {
                            String talents,
                            boolean scaleFactors,
                            int iterationsNumber,
-                           boolean dummy) throws IOException {
+                           boolean dummy) throws IOException, InterruptedException {
+
+
+        String workingPath = AppConfig.getInstance().getSimcraftExecutablePath();
+        File workingFolder = new File(workingPath);
         final Logger logger = LoggerFactory.getLogger(SimExecutor.class);
 
         SimulationResult simResult = new SimulationResult();
@@ -48,57 +52,65 @@ public class SimExecutor {
                         " dummy=%s -- UUID = %s",
                 areaId, serverId, characterName, scaleFactors, iterationsNumber, talents, dummy, uuid));
         Date stDate = new Date();
+
+        System.out.println(System.getProperty("user.dir"));
         List<String> cmd = new ArrayList<>();
 
-        cmd.add("./simc");
+        cmd.add(workingFolder.toPath().resolve("simc").toString());
         cmd.add(String.format("armory=%s,%s,%s", areaId, serverId, characterName));
-        cmd.add(String.format("calculate_scale_factors=%s", (scaleFactors ? "1" : "0")));
+        if (scaleFactors) cmd.add(String.format("calculate_scale_factors=%s", "1"));
+        else cmd.add(String.format("calculate_scale_factors=%s", "0"));
         if (!talents.equals("")) {
             cmd.add(String.format("talents=%s", talents));
         }
-        cmd.add(String.format("optimal_raid=%s", (dummy ? "0" : "1")));
+        if (dummy) cmd.add(String.format("optimal_raid=%s", "0"));
+        else cmd.add(String.format("optimal_raid=%s", "1"));
         cmd.add(String.format("output=result/%s.log", uuid));
         cmd.add(String.format("iterations=%s", iterationsNumber));
         cmd.add(String.format("json2=result/%s.json", uuid));
         cmd.add(String.format("html=result/%s.html", uuid));
 
-        ProcessBuilder pb = new ProcessBuilder(cmd);
-        Map<String, String> env = pb.environment();
-        env.clear();
+        ProcessBuilder pb = new ProcessBuilder();
+        pb.command(cmd);
+        pb.inheritIO();
+//        Map<String, String> env = pb.environment();
+//        env.clear();
 
-        String workingPath = AppConfig.getInstance().getSimcraftExecutablePath();
-
-        File workingFolder = new File(workingPath);
         pb.directory(workingFolder);
 
         Process proc = null;
         proc = pb.start();
+        proc.waitFor();
+//        System.out.println(IOUtils.toString(proc.getInputStream()));
+//        System.out.println(IOUtils.toString(proc.getErrorStream()));
 
+//        System.out.println(proc.waitFor());
 
-        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+//        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+//
+//        BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+//
+//        String s = null;
+//        while ((s = stdInput.readLine()) != null)
+//        {
+//            System.out.println(s);
+//            logger.debug(s);
+//        }
+//
+//        String err = "";
+//        while ((s = stdError.readLine()) != null) {
+//            if (s.contains("uses drop-level based scaling")) { continue; } //todo костыль для обхода проблем с lvl based item scaling
+//            errorFlag = true;
+//            logger.error(s);
+//            err += s + System.lineSeparator();
+//        }
+//
+//        if (errorFlag) {
+//            this.html = err;
+//            this.json = String.format("{\"error\":\"%s\"", err);
+//            return;
+//        }
 
-        BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-
-        String s = null;
-        while ((s = stdInput.readLine()) != null)
-        {
-            System.out.println(s);
-            logger.debug(s);
-        }
-
-        String err = "";
-        while ((s = stdError.readLine()) != null) {
-            if (s.contains("uses drop-level based scaling")) { continue; } //todo костыль для обхода проблем с lvl based item scaling
-            errorFlag = true;
-            logger.error(s);
-            err += s + System.lineSeparator();
-        }
-
-        if (errorFlag) {
-            this.html = err;
-            this.json = String.format("{\"error\":\"%s\"", err);
-            return;
-        }
 
         logger.info(String.format("Simulation for %s,%s,%s ended in %s", areaId, serverId, characterName,
                 Duration.between(stDate.toInstant(), (new Date()).toInstant())));
@@ -129,9 +141,11 @@ public class SimExecutor {
 
         simResult.uuid = uuid;
         simResult.engineVersion = jsonObject.get("version").getAsString();
-        simResult.wowVersion = jsonObject.getAsJsonObject("sim").
-                getAsJsonObject("options").getAsJsonObject("dbc").getAsJsonObject("Live").
-                get("wow_version").getAsString();
+        simResult.wowVersion = Optional.ofNullable(jsonObject.getAsJsonObject("sim"))
+                .map(item -> item.getAsJsonObject("options"))
+                .map(item -> item.getAsJsonObject("dbc"))
+                .map(item -> item.getAsJsonObject("Live"))
+                .map(item -> item.get("wow_version").getAsString()).orElse("");
 
         simResult.talents = talents;
 
