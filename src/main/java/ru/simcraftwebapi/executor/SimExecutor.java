@@ -86,7 +86,7 @@ public class SimExecutor {
         if(errorFlag) {
             JsonObject result = new JsonObject();
             result.addProperty("error", "simc did not succeed");
-            json = result.getAsString();
+            json = result.toString();
             return;
         }
 
