@@ -1,5 +1,7 @@
 package ru.simcraftwebapi.service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @Path("")
 public class SimulationService {
     final Logger logger = LoggerFactory.getLogger(SimulationService.class);
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @GET
     @Path("/simulate")
@@ -137,11 +140,13 @@ public class SimulationService {
         JsonObject result = new JsonObject();
         if (sim.isFinished) {
             result.addProperty("status", "Done");
-            return Response.ok(result).header("Location", String.format("/simcraft-api/simulate/async/result/%s", uuid)).build();
+            return Response.ok()
+                    .entity(gson.toJson(result)).header("Location", String.format("/simcraft-api/simulate/async/result/%s", uuid)).build();
         }
         else {
             result.addProperty("status", "Pending");
-            return Response.ok(result)
+            return Response.ok()
+                    .entity(gson.toJson(result))
                     .header("Location", String.format("/simcraft-api/simulate/async/status/%s", uuid))
                     .build();
         }
