@@ -1,0 +1,1 @@
+mvn clean package -DskipTests -f prod.pom.xml
